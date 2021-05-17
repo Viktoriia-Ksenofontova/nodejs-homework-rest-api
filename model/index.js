@@ -1,6 +1,6 @@
 const Contact = require('./schemas/contact');
 
-const listContacts = async () => {
+const getListContacts = async () => {
     const results = await Contact.find({})
     return results;
 }
@@ -24,12 +24,17 @@ const updateContact = async (contactId, body) => {
   const result = await Contact.findByIdAndUpdate(contactId, { ...body }, { new: true });
   return result;
 }
-   
+
+const updateStatusContact = async (contactId, body) => {
+  const result= await Contact.findByIdAndUpdate(contactId, { ...body }, { new: true });
+  return result;
+}
 
 module.exports = {
-  listContacts,
+  getListContacts,
   getContactById,
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 }
