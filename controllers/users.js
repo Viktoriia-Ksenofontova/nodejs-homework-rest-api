@@ -3,6 +3,8 @@ require('dotenv').config();
 const Users = require('../model/users');
 const { httpCode } = require("../helpers/constants");
 const JWT_KEY = process.env.JWT_KEY;
+const AVATARS_OF_USERS = process.env.AVATARS_OF_USERS;
+const LocalUploadAvatar = require('../services/avatars-local');
 
 const signup = async (req, res, next) => {
   try {
@@ -15,12 +17,12 @@ const signup = async (req, res, next) => {
     });
     }
     const newUser = await Users.createUser(req.body);
-    const { id, email, subscription } = newUser;
+    const { id, email, subscription, avatarURL } = newUser;
     return res.status(httpCode.CREATED).json({
       status: "success",
       code: httpCode.CREATED,
       data: {
-        id, email, subscription
+        id, email, subscription, avatarURL
       }
     })
   } catch (e) {
@@ -67,15 +69,7 @@ const logout = async (req, res, next) => {
 
 const currentUser = async (req, res, next) => {
   try {
-    const user = await Users.findUserById(req.user.id);
-    if (!user) {
-      return res.status(httpCode.UNAUTHORIZED).json({
-        status: 'error',
-        code: httpCode.UNAUTHORIZED,
-        message: "Not authorized"
-      });
-    }
-    const { email, subscription } = user;
+    const { email, subscription } = req.user;
     return res.status(httpCode.OK).json({
       status: 'success',
       code: httpCode.OK,
@@ -109,10 +103,33 @@ const updateSubscription = async (req, res, next) => {
   }
 }
 
+const avatars = async (req, res, next) => {
+  try {
+    const id = req.user.id;
+    const uploads = new LocalUploadAvatar(AVATARS_OF_USERS);
+    const avatarUrl = await uploads.saveAvatarToStatic({
+      idUser: id,
+      pathFile: req.file.path,
+      name: req.file.filename,
+      oldFile:req.user.avatarURL
+
+    })
+    await Users.updateUserAvatar(id, avatarUrl);
+    return res.json({
+      status: 'success',
+      code: httpCode.OK,
+      data: { avatarUrl },
+    })
+  } catch (e) {
+    next(e)
+   }
+};
+
 module.exports = {
   signup,
   login,
   logout,
   currentUser,
-  updateSubscription
+  updateSubscription,
+  avatars
 }
