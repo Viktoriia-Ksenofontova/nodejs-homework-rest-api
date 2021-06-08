@@ -18,13 +18,6 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    
-    if (!mongoose.isValidObjectId(req.params.contactId)) {
-      return res.status(httpCode.BAD_REQUEST).json({
-      status: 'error',
-      code: httpCode.BAD_REQUEST,
-      message: 'incorrect id'
-    })}
     const userId = req.user.id;
     const contact = await Contacts.getContactById(userId, req.params.contactId);
     if (contact) {

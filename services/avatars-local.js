@@ -1,6 +1,6 @@
 const path = require('path');
 const createFolderIsNotExist = require('../helpers/create-dir');
-const fs = require('fs/promises');
+const {rename, access, unlink} = require('fs/promises');
 const Jimp = require('jimp');
 
 class LocalUpload{
@@ -18,20 +18,20 @@ class LocalUpload{
 
   async saveAvatarToStatic({idUser, pathFile, name, oldFile}) {
     await this.transformAvatar(pathFile)
-    const folderUserAvatar = path.join('public', this.AVATARS_OF_USERS, idUser);
+    const folderUserAvatar = path.join('public', this.AVATARS_OF_USERS);
     await createFolderIsNotExist(folderUserAvatar);
-    await fs.rename(pathFile, path.join(folderUserAvatar, name));
-    await this.deleteOldAvatar(path.join(process.cwd(),'public', this.AVATARS_OF_USERS, oldFile))
-    const avatarURL = path.normalize(path.join(idUser, name));
+    await rename(pathFile, path.join(folderUserAvatar, name));
+    await this.deleteOldAvatar(path.join(process.cwd(), 'public', oldFile))
+    
+    const avatarURL = path.normalize(path.join(this.AVATARS_OF_USERS, name));
     return avatarURL
   }
   async deleteOldAvatar(pathFile) {
     try {
-      await fs.unlink(pathFile)
+      await unlink(pathFile)
     } catch (error) {
-      console.error(error.message)
+      console.log(error.message)
     }
-    
   }
 }
 

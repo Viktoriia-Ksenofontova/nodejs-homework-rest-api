@@ -14,7 +14,8 @@ app.use(helmet())
 require('dotenv').config()
 
 app.use(express.static('public'))
-app.use(logger(formatsLogger))
+
+app.get('env') !=='test' && app.use(logger(formatsLogger))
 app.use(cors())
 app.use(express.json({limit: 15000}))
 app.use(boolParser())
