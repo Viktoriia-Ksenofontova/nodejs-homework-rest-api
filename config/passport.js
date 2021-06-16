@@ -20,6 +20,10 @@ passport.use(
         return done(null, false)
       }
 
+      if (!user.isVerify) {
+        return done(null, false)
+      }
+
       return done(null, user)
     } catch (e) {
       return done(e, false)
